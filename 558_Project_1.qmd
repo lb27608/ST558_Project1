@@ -8,7 +8,7 @@ editor: visual
 ```{r}
 library(httr)
 library(jsonlite)
-url_pums<-"https://api.census.gov/data/2022/acs/acs1/pums?get=SEX,PWGTP,AGEP&SCHL=04"
+url_pums<-"https://api.census.gov/data/2022/acs/acs1/pums?get=SEX,PWGTP,AGEP&SCHL=04&for=state:6"
 raw<-httr::GET(url_pums)
 str(raw,max.level=1)
 parsed<-fromJSON(rawToChar(raw$content))
