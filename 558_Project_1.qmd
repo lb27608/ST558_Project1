@@ -1,10 +1,10 @@
 ---
 title: "558_Project_1"
-author: "Lee Bennett and Madelyn Garrison"
 format: html
 editor: visual
 ---
 
+<<<<<<< HEAD
 ```{r}
 #| include: false
 #| echo: false
@@ -77,3 +77,16 @@ plot.census <- function(cens_tibble,num_var,cat_var) {
 }
 ```
 
+=======
+
+```{r}
+library(httr)
+library(jsonlite)
+url_pums<-"https://api.census.gov/data/2022/acs/acs1/pums?get=SEX,PWGTP,AGEP&SCHL=04&for=state:6"
+raw<-httr::GET(url_pums)
+str(raw,max.level=1)
+parsed<-fromJSON(rawToChar(raw$content))
+info<-as_tibble(parsed[-1,])
+```
+
+>>>>>>> e559b10b2cfceae8f4cb50a6ca5e6645924dfbfb
