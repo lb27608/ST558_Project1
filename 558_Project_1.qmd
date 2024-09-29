@@ -6,7 +6,34 @@ editor: visual
 ---
 
 ```{r}
-    library(tidycensus)
+#| include: false
+#| echo: false
+
+library(tidyverse)
+library(tidycensus)
+library(ggplot2)
+```
+
+# Retrieving and Processing Data from the PUMS Census API
+
+First, we'll create a helper function that will process the raw data retrived from the API into a `tibble`. This function also adds a new class called `census` for this tibble, and we will use this class for summarizing the data later.
+
+```{r}
+
+cens_tibble <- function(rawdata) {
+  pums_tib <- as_tibble(rawdata)
+  
+  class(pums_tib) <- c("census",class(pums_tib))
+  
+  return(pums_tib)
+}
+```
+
+
+## Get PUMS data from Census API for a single year
+
+```{r}
+
     trial<-function(nvar1='AGEP',nvar2=NULL,nvar3=NULL, nvar4=NULL, 
                     nvar5=NULL, nvar6=NULL,yr='2022', cvar1='SEX', 
                     cvar2=NULL, cvar3=NULL, cvar4=NULL, cvar5=NULL, 
@@ -24,4 +51,40 @@ editor: visual
       }
 
     x<-trial()
+    
+    tib_check <- pums_tbl(x)
 ```
+
+Suppose a user wants to obtain multiple years of data for a given set of variables. The following function will call the query for a list of years specified as a vector:
+
+```{r}
+
+pums_years <- function(yr_list) {
+
+}
+```
+
+# Exploring the PUMS Data
+
+## Summary statistics
+
+We previously created a class called `census` for tibbles generated from PUMS data queriers. We now create a custom summary function for tibbles of this class to produce means and standard deviations for selected numeric variables:
+
+```{r}
+summary.census <- function(cens_tibble,num_vars,cat_vars){
+  
+}
+```
+
+
+## Creating box plots
+
+Finally, we create a function that allows us to generate a box plot for a specified numeric variable, grouped by the levels of a specified categorical variable:
+
+```{r}
+plot.census <- function(cens_tibble,num_var,cat_var) {
+  ggplot(cens_tibble,aes(x=get(cat_var), y=get(num_var), weight=PWGTP)) + geom_boxplot()
+
+}
+```
+
