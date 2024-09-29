@@ -1,9 +1,9 @@
 ---
 title: "558_Project_1"
+author: "Lee Bennett and Madelyn Garrison"
 format: html
 editor: visual
 ---
-
 
 ```{r}
     library(tidycensus)
@@ -25,4 +25,3 @@ editor: visual
 
     x<-trial()
 ```
-
