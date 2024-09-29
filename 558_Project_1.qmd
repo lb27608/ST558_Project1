@@ -23,7 +23,9 @@ First, we'll create a helper function that will process the raw data retrived fr
 ```{r}
 
 cens_tibble <- function(rawdata) {
-  pums_tib <- as_tibble(rawdata)
+  raw<-httr::GET(rawdata)
+  parsed<-fromJSON(rawToChar(raw$content))
+  pums_tib <- as_tibble(parsed[-1,])
   
   class(pums_tib) <- c("census",class(pums_tib))
   
@@ -35,12 +37,10 @@ cens_tibble <- function(rawdata) {
 ## Get PUMS data from Census API for a single year
 
 ```{r}
-
+function(){
 url_pums<-"https://api.census.gov/data/2022/acs/acs1/pums?get=SEX,PWGTP,AGEP&SCHL=04&for=state:6"
-raw<-httr::GET(url_pums)
-str(raw,max.level=1)
-parsed<-fromJSON(rawToChar(raw$content))
-info<-as_tibble(parsed[-1,])
+cens_tibble(url_pums)
+}
 ```
 
 Suppose a user wants to obtain multiple years of data for a given set of variables. The following function will call the query for a list of years specified as a vector:
