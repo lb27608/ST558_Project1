@@ -1,27 +1,17 @@
 ---
 title: "558_Project_1"
-author: "Lee Bennett and Madelyn Garrison"
 format: html
 editor: visual
 ---
 
-```{r}
-    library(tidycensus)
-    trial<-function(nvar1='AGEP',nvar2=NULL,nvar3=NULL, nvar4=NULL, 
-                    nvar5=NULL, nvar6=NULL,yr='2022', cvar1='SEX', 
-                    cvar2=NULL, cvar3=NULL, cvar4=NULL, cvar5=NULL, 
-                    cvar6=NULL,cvar7=NULL,cvar8=NULL,cvar9=NULL)
-      {
-              ends <- get_pums(variables = c(nvar1, nvar2, nvar3, nvar4, 
-                                             nvar5, nvar6, cvar1, cvar2, 
-                                             cvar3, cvar4, cvar5, cvar6, 
-                                             cvar7, cvar8, cvar9),
-                               survey = "acs1",
-                               state = 'NC',
-                               year = if (yr <= 2023 & yr >=2010){yr}
-                              )
-              return(ends)
-      }
 
-    x<-trial()
+```{r}
+library(httr)
+library(jsonlite)
+url_pums<-"https://api.census.gov/data/2022/acs/acs1/pums?get=SEX,PWGTP,AGEP&SCHL=04"
+raw<-httr::GET(url_pums)
+str(raw,max.level=1)
+parsed<-fromJSON(rawToChar(raw$content))
+info<-as_tibble(parsed[-1,])
 ```
+
