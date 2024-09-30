@@ -25,7 +25,9 @@ First, we'll create a helper function that will process the raw data retrived fr
 cens_tibble <- function(rawdata) {
   raw<-httr::GET(rawdata)
   parsed<-fromJSON(rawToChar(raw$content))
-  pums_tib <- as_tibble(parsed[-1,])
+  matrix_data<-parsed[-1,]
+  colnames(matrix_data)<-parsed[1,]
+  pums_tib <- as_tibble(matrix_data)
   
   class(pums_tib) <- c("census",class(pums_tib))
   
