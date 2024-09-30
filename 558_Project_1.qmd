@@ -37,10 +37,21 @@ cens_tibble <- function(rawdata) {
 ## Get PUMS data from Census API for a single year
 
 ```{r}
-function(){
-url_pums<-"https://api.census.gov/data/2022/acs/acs1/pums?get=SEX,PWGTP,AGEP&SCHL=04&for=state:6"
+
+trial<-function(yr){
+
+base_url<-"https://api.census.gov/data/"
+year_url<-paste(yr,'/',sep='')
+middle_base_url<-"acs/acs1/pums?"
+
+get_url<-paste('get=PWGTP,',vars,'&SEX')
+geo_url<-"&for=state:6"
+url_pums<-paste0(base_url, year_url,middle_base_url,get_url,geo_url)
 cens_tibble(url_pums)
 }
+attempt<-trial(2022)
+
+
 ```
 
 Suppose a user wants to obtain multiple years of data for a given set of variables. The following function will call the query for a list of years specified as a vector:
