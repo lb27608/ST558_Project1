@@ -38,19 +38,44 @@ cens_tibble <- function(rawdata) {
 
 ```{r}
 
-trial<-function(yr){
+trial<-function(yr,AGEP=TRUE,GASP=FALSE,SEX=TRUE,geography='state',geo_code=06){
 
 base_url<-"https://api.census.gov/data/"
 year_url<-paste(yr,'/',sep='')
 middle_base_url<-"acs/acs1/pums?"
-
-get_url<-paste('get=PWGTP,',vars,'&SEX')
-geo_url<-"&for=state:6"
-url_pums<-paste0(base_url, year_url,middle_base_url,get_url,geo_url)
+get_start_url<-"get="
+    vec<-'PWGTP'
+   if (AGEP) {
+    vec <- c(vec,'AGEP')
+    }
+  if (GASP) {
+    vec <- c(vec,'GASP')
+  }
+    if (SEX)
+      vec<-c(vec,'SEX')
+vars_url<-paste0(vec[-2],collapse = ',')
+get_end_url<-paste('&',vec[2],sep='')
+for_url<-"&for="
+  if (geography =='division') {
+    geo<-'division'
+  }
+  if (geography =='region') {
+    geo<-'region'
+  }
+  if (geography =='state') {
+    geo<-'state'
+  }
+ if (geography =='all') {
+    geo_url<-''
+    for_url<-''
+ }
+else{
+geo_url<-paste(geo,geo_code,sep=':')
+}
+url_pums<-paste0(base_url, year_url,middle_base_url,get_start_url,vars_url,get_end_url,for_url,geo_url)
 cens_tibble(url_pums)
 }
-attempt<-trial(2022)
-
+attempt<-trial(2022,GASP=TRUE,geography='division',geo_code=8)
 
 ```
 
