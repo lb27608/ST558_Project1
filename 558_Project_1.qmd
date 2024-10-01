@@ -40,7 +40,7 @@ cens_tibble <- function(rawdata) {
 
 ```{r}
 
-trial<-function(yr,AGEP=TRUE,GASP=FALSE,SEX=TRUE,geography='state',geo_code=06){
+trial<-function(yr,AGEP=TRUE,GASP=FALSE,GRPIP=FALSE,JWAP=FALSE,JWDP=FALSE,JWMNP=FALSE,FER=FALSE,HHL=FALSE,HISPEED=FALSE,SCH=FALSE,SCHL=FALSE,SEX=TRUE,geography='state',geo_code=06){
 
 base_url<-"https://api.census.gov/data/"
 year_url<-paste(yr,'/',sep='')
@@ -53,8 +53,36 @@ get_start_url<-"get="
   if (GASP) {
     vec <- c(vec,'GASP')
   }
-    if (SEX)
+    if (SEX){
       vec<-c(vec,'SEX')
+    }
+    if (GRPIP){
+      vec<-c(vec,'GRPIP')
+    }
+    if (JWAP){
+      vec<-c(vec,'JWAP')
+    }
+    if (JWDP){
+      vec<-c(vec,'JWDP')
+    }
+    if (JWMNP){
+      vec<-c(vec,'JWMNP')
+    }
+    if (FER){
+      vec<-c(vec,'FER')
+    }
+    if (HHL){
+      vec<-c(vec,'HHL')
+    }
+    if (HISPEED){
+      vec<-c(vec,'HISPEED')
+    }
+    if (SCH){
+      vec<-c(vec,'SCH')
+    }
+    if (SCHL){
+      vec<-c(vec,'SCHL')
+    }
 vars_url<-paste0(vec[-2],collapse = ',')
 get_end_url<-paste('&',vec[2],sep='')
 for_url<-"&for="
