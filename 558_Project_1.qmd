@@ -16,7 +16,9 @@ library(httr)
 library(jsonlite)
 library(hms)
 ```
+# Introduction
 
+In this project, we'll be creating functions to retrieve data from the US Census Public Use Microdata Sample (PUMS), manipulate that data into a tidy tibble, and then perform a few basic summary analyses. 
 # Retrieving and Processing Data from the PUMS Census API
 
 First, we'll create a helper function that will process the raw data retrived from the API into a `tibble`. This function also adds a new class called `census` for this tibble, and we will use this class for summarizing the data later.
@@ -35,7 +37,6 @@ cens_tibble <- function(rawdata) {
   return(pums_tib)
 }
 ```
-
 
 ## Get PUMS data from Census API for a single year
 
@@ -181,12 +182,33 @@ attempt
 
 ```
 
-Suppose a user wants to obtain multiple years of data for a given set of variables. The following function will call the query for a list of years specified as a vector:
+Suppose a user wants to obtain multiple years of data for a given set of variables. The following function will call the query for a list of years specified as a vector of numeric values. Because there is no PUMS data available for 2020, this function will also skip that year if a user includes it in the list.
 
 ```{r}
 
 pums_years <- function(yr_list) {
-
+  yr_len <- length(yr_list)
+  
+  for(i:yr_len){
+    yr <- yr_list[i]
+    
+    # Check to see if 2020 was included and skip if necessary
+    if (yr == 2020) {
+      next
+    }
+    
+    # Get data for the specified year and append a year variable
+    yr_tib <- trial(yr,FER=TRUE,geography='division',geo_code=8,HHL=TRUE,JWAP=FALSE) |> mutate(year=yr)
+    
+    # Start or append the cumulative results tibble
+        if (i == 1) {
+      pums_combined <- yr_tib  
+    } else {
+      pums_combined <- bind_rows(pums_combined,yr_tib)
+    }
+  }
+  
+  return(pums_combined)
 }
 ```
 
@@ -202,7 +224,6 @@ summary.census <- function(cens_tibble,num_vars,cat_vars){
 }
 ```
 
-
 ## Creating box plots
 
 Finally, we create a function that allows us to generate a box plot for a specified numeric variable, grouped by the levels of a specified categorical variable:
@@ -213,4 +234,3 @@ plot.census <- function(cens_tibble,num_var,cat_var) {
 
 }
 ```
-
