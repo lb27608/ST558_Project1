@@ -65,7 +65,10 @@ get_PUMS_API<-function(yr, AGEP=TRUE, GASP=FALSE, GRPIP=FALSE, JWAP=FALSE ,JWDP=
                        SCH=FALSE, SCHL=FALSE, SEX=TRUE, geography='state', geo_code=04)
   {
   base_url<-"https://api.census.gov/data/"
-  year_url<-paste(yr,'/',sep='')
+  if(yr>=2010 & yr<=2022){
+    year_url<-paste(yr,'/',sep='')
+    }
+    else{stop()}
   middle_base_url<-"acs/acs1/pums?"
   get_start_url<-"get="
   vec<-'PWGTP'
@@ -145,7 +148,9 @@ get_PUMS_API<-function(yr, AGEP=TRUE, GASP=FALSE, GRPIP=FALSE, JWAP=FALSE ,JWDP=
     }
   if (JWAP){
     temp <- httr::GET("https://api.census.gov/data/2022/acs/acs1/pums/variables/JWAP.json")
-    temp_list <- temp$content |> rawToChar() |>jsonlite::fromJSON()
+    temp_list <- temp$content |> 
+      rawToChar() |>
+      jsonlite::fromJSON()
     JWAP <- temp_list$values$item
     JWAP_values <- JWAP[sort(names(JWAP))]
     x<-as_tibble(JWAP_values)
@@ -170,7 +175,9 @@ get_PUMS_API<-function(yr, AGEP=TRUE, GASP=FALSE, GRPIP=FALSE, JWAP=FALSE ,JWDP=
    }
   if (JWDP){
     temp <- httr::GET("https://api.census.gov/data/2022/acs/acs1/pums/variables/JWDP.json")
-    temp_list <- temp$content |> rawToChar() |>jsonlite::fromJSON()
+    temp_list <- temp$content |> 
+      rawToChar() |>
+      jsonlite::fromJSON()
     JWDP <- temp_list$values$item
     JWDP_values <- JWDP[sort(names(JWDP))]
     x<-as_tibble(JWDP_values)
@@ -240,9 +247,7 @@ get_PUMS_API<-function(yr, AGEP=TRUE, GASP=FALSE, GRPIP=FALSE, JWAP=FALSE ,JWDP=
 
 
 
-
-
-
+new<-get_PUMS_API(yr=2015, JWAP=TRUE)
 
 
 
