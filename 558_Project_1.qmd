@@ -60,116 +60,186 @@ frmt_char_var<-function(y='all'){
 
 
 
-trial<-function(yr,AGEP=TRUE,GASP=FALSE,GRPIP=FALSE,JWAP=FALSE,JWDP=FALSE,JWMNP=FALSE,FER=FALSE,HHL=FALSE,HISPEED=FALSE,JWTRNS=FALSE,SCH=FALSE,SCHL=FALSE,SEX=TRUE,geography='state',geo_code=04){
-
-base_url<-"https://api.census.gov/data/"
-year_url<-paste(yr,'/',sep='')
-middle_base_url<-"acs/acs1/pums?"
-get_start_url<-"get="
-    vec<-'PWGTP'
-   if (AGEP) {
+get_PUMS_API<-function(yr, AGEP=TRUE, GASP=FALSE, GRPIP=FALSE, JWAP=FALSE ,JWDP=FALSE, 
+                       JWMNP=FALSE ,FER=FALSE ,HHL=FALSE, HISPEED=FALSE, JWTRNS=FALSE, 
+                       SCH=FALSE, SCHL=FALSE, SEX=TRUE, geography='state', geo_code=04)
+  {
+  base_url<-"https://api.census.gov/data/"
+  year_url<-paste(yr,'/',sep='')
+  middle_base_url<-"acs/acs1/pums?"
+  get_start_url<-"get="
+  vec<-'PWGTP'
+  if (AGEP) {
     vec <- c(vec,'AGEP')
     }
   if (GASP) {
     vec <- c(vec,'GASP')
-  }
-    if (SEX){
-      vec<-c(vec,'SEX')
     }
-    if (GRPIP){
-      vec<-c(vec,'GRPIP')
+  if (SEX){
+    vec<-c(vec,'SEX')
     }
-    if (JWAP){
-      vec<-c(vec,'JWAP')
+  if (GRPIP){
+    vec<-c(vec,'GRPIP')
     }
-    if (JWDP){
-      vec<-c(vec,'JWDP')
+  if (JWAP){
+    vec<-c(vec,'JWAP')
     }
-    if (JWMNP){
-      vec<-c(vec,'JWMNP')
+  if (JWDP){
+    vec<-c(vec,'JWDP')
     }
-    if (FER){
-      vec<-c(vec,'FER')
+  if (JWMNP){
+    vec<-c(vec,'JWMNP')
     }
-    if (HHL){
-      vec<-c(vec,'HHL')
+  if (FER){
+    vec<-c(vec,'FER')
     }
-    if (HISPEED){
-      vec<-c(vec,'HISPEED')
+  if (HHL){
+    vec<-c(vec,'HHL')
     }
-    if (SCH){
-      vec<-c(vec,'SCH')
+  if (HISPEED){
+    vec<-c(vec,'HISPEED')
     }
-    if (SCHL){
-      vec<-c(vec,'SCHL')
+  if (SCH){
+    vec<-c(vec,'SCH')
     }
-    if (JWTRNS){
-      vec<-c(vec,'JWTRNS')
+  if (SCHL){
+    vec<-c(vec,'SCHL')
     }
-vars_url<-paste0(vec[-2],collapse = ',')
-get_end_url<-paste('&',vec[2],sep='')
-for_url<-"&for="
+  if (JWTRNS){
+    vec<-c(vec,'JWTRNS')
+    }
+  vars_url<-paste0(vec[-2],collapse = ',')
+  get_end_url<-paste('&',vec[2],sep='')
+  for_url<-"&for="
   if (geography =='division') {
     geo<-'division'
-  }
+    }
   if (geography =='region') {
     geo<-'region'
-  }
+    }
   if (geography =='state') {
     geo<-'state'
-  }
- if (geography =='all') {
+    }
+  if (geography =='all') {
     geo_url<-''
     for_url<-''
- }
-else{
-geo_url<-paste(geo,geo_code,sep=':')
+    }
+  else{
+    geo_url<-paste(geo,geo_code,sep=':')
+    }
+  url_pums<-paste0(base_url, year_url, middle_base_url, get_start_url, vars_url,        
+                   get_end_url,for_url,geo_url)
+  final<-cens_tibble(url_pums)
+  final$PWGTP<-as.numeric(final$PWGTP)
+  if(AGEP){
+    final$AGEP<-as.numeric(final$AGEP)
+    }
+  if(GASP){
+    final$GASP<-as.numeric(final$GASP)
+    }
+  if(GRPIP){
+    final$GRPIP<-as.numeric(final$GRPIP)
+    }
+  if(JWMNP){
+    final$JWMNP<-as.numeric(final$JWMNP)
+    }
+  if (JWAP){
+    temp <- httr::GET("https://api.census.gov/data/2022/acs/acs1/pums/variables/JWAP.json")
+    temp_list <- temp$content |> rawToChar() |>jsonlite::fromJSON()
+    JWAP <- temp_list$values$item
+    JWAP_values <- JWAP[sort(names(JWAP))]
+    x<-as_tibble(JWAP_values)
+    x2<-pivot_longer(x[,-1],cols = 1:285) |>
+      separate_wider_delim(cols=value,delim='to', names = c('start','end'))|>
+      mutate(ap=ifelse(grepl('a',start),'a.m.','p.m.'))|>
+      mutate(start=str_remove_all(start,"[apm.]"),end=str_remove_all(end,"[apm.]"))|>
+      separate_wider_delim(cols=start,delim=':', names = c('hour','min'))|>
+      separate_wider_delim(cols=end,delim=':', names = c('hour2','min2'))|>
+      mutate(mid=(as.numeric(min2)+as.numeric(min))/2)|>
+      mutate(mid=as.character(format(round(as.numeric(mid),2))))|>
+      separate_wider_delim(cols=mid,delim='.', names = c('minn','sec'))|>
+      unite(col='timez',hour,minn,sec,sep=":")|>
+      mutate(timez=hms::parse_hms(timez))|>
+      unite(col=time,timez,ap,sep=' ')|>
+      select(name,time)
+  final<-left_join(final,x2,by=join_by(JWAP==name))|>
+    select(-JWAP)|>
+    mutate(time=ifelse(is.na(time),'N/A (not a worker; worker who worked from home)', 
+                       time))|>
+    rename("JWAP"="time")
+   }
+  if (JWDP){
+    temp <- httr::GET("https://api.census.gov/data/2022/acs/acs1/pums/variables/JWDP.json")
+    temp_list <- temp$content |> rawToChar() |>jsonlite::fromJSON()
+    JWDP <- temp_list$values$item
+    JWDP_values <- JWDP[sort(names(JWDP))]
+    x<-as_tibble(JWDP_values)
+    x2<-pivot_longer(x[,-1],cols = 1:150) |>
+      separate_wider_delim(cols=value,delim='to', names = c('start','end'))|>
+      mutate(ap=ifelse(grepl('a',start),'a.m.','p.m.'))|>
+      mutate(start=str_remove_all(start,"[apm.]"),end=str_remove_all(end,"[apm.]"))|>
+      separate_wider_delim(cols=start,delim=':', names = c('hour','min'))|>
+      separate_wider_delim(cols=end,delim=':', names = c('hour2','min2'))|>
+      mutate(mid=(as.numeric(min2)+as.numeric(min))/2)|>
+      mutate(mid=as.character(format(round(as.numeric(mid),2))))|>
+      separate_wider_delim(cols=mid,delim='.', names = c('minn','sec'))|>
+      unite(col='timez',hour,minn,sec,sep=":")|>
+      mutate(timez=hms::parse_hms(timez))|>
+      unite(col=time,timez,ap,sep=' ')|>
+      select(name,time)
+  final<-left_join(final,x2,by=join_by(JWDP==name))|>
+    select(-JWDP)|>
+    mutate(time=ifelse(is.na(time),'N/A (not a worker; worker who worked from home)', 
+                       time))|>
+    rename("JWDP"="time")
+   }
+  if(FER){
+    fmt_FER<-frmt_char_var('FER')
+    final<-left_join(final,fmt_FER,by=join_by(FER==name))|>
+      select(-FER)|>
+      rename("FER"="value")
+    }
+  if(HHL){
+    fmt_HHL<-frmt_char_var('HHL')
+    final<-left_join(final,fmt_HHL,by=join_by(HHL==name))|>
+      select(-HHL)|>
+      rename("HHL"="value")
+    }
+  if(HISPEED){
+    fmt_HISPEED<-frmt_char_var('HISPEED')
+    final<-left_join(final,fmt_HISPEED,by=join_by(HISPEED==name))|>
+      select(-HISPEED)|>
+      rename("HISPEED"="value")
+    }
+  if(JWTRNS){
+    fmt_JWTRNS<-frmt_char_var('JWTRNS')
+    final<-left_join(final,fmt_JWTRNS,by=join_by(JWTRNS==name))|>
+      select(-JWTRNS)|>
+      rename("JWTRNS"="value")
+    }
+  if(SCH){
+    fmt_SCH<-frmt_char_var('SCH')
+    final<-left_join(final,fmt_SCH,by=join_by(SCH==name))|>
+      select(-SCH)|>
+      rename("SCH"="value")
+    }
+  if(SCHL){
+    fmt_SCHL<-frmt_char_var('SCHL')
+    final<-left_join(final,fmt_SCHL,by=join_by(SCHL==name))|>
+      select(-SCHL)|>
+      rename("SCHL"="value")
+    }
+  if(SEX){
+    fmt_SEX<-frmt_char_var('SEX')
+    final<-left_join(final,fmt_SEX,by=join_by(SEX==name))|>
+      select(-SEX)|>
+      rename("SEX"="value")
+    }
+  return(final)
 }
-url_pums<-paste0(base_url, year_url,middle_base_url,get_start_url,vars_url,get_end_url,for_url,geo_url)
-final<-cens_tibble(url_pums)
-
-if (JWAP){
-temp <- httr::GET("https://api.census.gov/data/2022/acs/acs1/pums/variables/JWAP.json")
-temp_list <- temp$content |> rawToChar() |>jsonlite::fromJSON()
-JWAP <- temp_list$values$item
-JWAP_values <- JWAP[sort(names(JWAP))]
-x<-as_tibble(JWAP_values)
-x2<-pivot_longer(x[,-1],cols = 1:285) |>
-  separate_wider_delim(cols=value,delim='to', names = c('start','end'))|>
-  mutate(ap=ifelse(grepl('a',start),'a.m.','p.m.'))|>
-  mutate(start=str_remove_all(start,"[apm.]"),end=str_remove_all(end,"[apm.]"))|>
-  separate_wider_delim(cols=start,delim=':', names = c('hour','min'))|>
-  separate_wider_delim(cols=end,delim=':', names = c('hour2','min2'))|>
-  mutate(mid=(as.numeric(min2)+as.numeric(min))/2)|>
-  mutate(mid=as.character(format(round(as.numeric(mid),2))))|>
-  separate_wider_delim(cols=mid,delim='.', names = c('minn','sec'))|>
-  unite(col='timez',hour,minn,sec,sep=":")|>
-  mutate(timez=hms::parse_hms(timez))|>
-  unite(col=time,timez,ap,sep=' ')|>
-  select(name,time)
-
-final<-left_join(final,x2,by=join_by(JWAP==name))|>
-  select(-JWAP)|>
-  mutate(time=ifelse(is.na(time),'N/A (not a worker; worker who worked from home)',time))|>
-  rename("JWAP"="time")
-}
-if(FER){
-  fmt_FER<-frmt_char_var('FER')
-
-final<-left_join(final,fmt_FER,by=join_by(FER==name))|>
-  select(-FER)|>
-  rename("FER"="value")
-}
-return(final)
 
 
-
-
-
-
-
-}
-attempt<-trial(2022,FER=TRUE,geography='division',geo_code=8,HHL=TRUE,JWAP=FALSE)
+attempt<-get_PUMS_API(2022,JWMNP=TRUE,geography='division',geo_code=8)
 attempt
 
 
