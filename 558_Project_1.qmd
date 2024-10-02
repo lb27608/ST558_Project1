@@ -239,10 +239,6 @@ get_PUMS_API<-function(yr, AGEP=TRUE, GASP=FALSE, GRPIP=FALSE, JWAP=FALSE ,JWDP=
 }
 
 
-attempt<-get_PUMS_API(2022,JWMNP=TRUE,geography='division',geo_code=8)
-attempt
-
-
 
 
 
@@ -259,7 +255,7 @@ Suppose a user wants to obtain multiple years of data for a given set of variabl
 pums_years <- function(yr_list) {
   yr_len <- length(yr_list)
   
-  for(i:yr_len){
+  for(i in 1:yr_len){
     yr <- yr_list[i]
     
     # Check to see if 2020 was included and skip if necessary
@@ -268,7 +264,7 @@ pums_years <- function(yr_list) {
     }
     
     # Get data for the specified year and append a year variable
-    yr_tib <- trial(yr,FER=TRUE,geography='division',geo_code=8,HHL=TRUE,JWAP=FALSE) |> mutate(year=yr)
+    yr_tib <- get_PUMS_API(yr,FER=TRUE,geography='division',geo_code=8,HHL=TRUE,JWAP=FALSE) |> mutate(year=yr)
     
     # Start or append the cumulative results tibble
         if (i == 1) {
@@ -280,6 +276,7 @@ pums_years <- function(yr_list) {
   
   return(pums_combined)
 }
+
 ```
 
 # Exploring the PUMS Data
