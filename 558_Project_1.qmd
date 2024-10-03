@@ -62,7 +62,7 @@ frmt_char_var<-function(y='all'){
 
 get_PUMS_API<-function(yr, AGEP=TRUE, GASP=FALSE, GRPIP=FALSE, JWAP=FALSE ,JWDP=FALSE, 
                        JWMNP=FALSE ,FER=FALSE ,HHL=FALSE, HISPEED=FALSE, JWTRNS=FALSE, 
-                       SCH=FALSE, SCHL=FALSE, SEX=TRUE, geography='state', geo_code=04)
+                       SCH=FALSE, SCHL=FALSE, SEX=TRUE, geography='state', geo_code=06)
   {
   base_url<-"https://api.census.gov/data/"
   if(yr>=2010 & yr<=2022){
@@ -111,6 +111,16 @@ get_PUMS_API<-function(yr, AGEP=TRUE, GASP=FALSE, GRPIP=FALSE, JWAP=FALSE ,JWDP=
   if (JWTRNS){
     vec<-c(vec,'JWTRNS')
     }
+  if ("AGEP" %in% vec | "GASP" %in% vec| "GRPIP" %in% vec| "JWAP" %in% vec| "JWDP" %in% vec| "JWMNP" %in% vec) {
+    vec<-vec  
+    } else {
+    stop()
+    }
+  if ("SEX" %in% vec | "FER" %in% vec| "HHL" %in% vec| "HISPEED" %in% vec| "JWTRNS" %in% vec| "SCH" %in% vec| "SCHL" %in% vec) {
+    vec<-vec  
+    } else {
+    stop()
+    }
   vars_url<-paste0(vec[-2],collapse = ',')
   get_end_url<-paste('&',vec[2],sep='')
   for_url<-"&for="
@@ -126,7 +136,10 @@ get_PUMS_API<-function(yr, AGEP=TRUE, GASP=FALSE, GRPIP=FALSE, JWAP=FALSE ,JWDP=
   if (geography =='all') {
     geo_url<-''
     for_url<-''
-    }
+  }
+  if(geo_code==''){
+    geo_url<-paste(geo,'*',sep=':')
+  }
   else{
     geo_url<-paste(geo,geo_code,sep=':')
     }
@@ -247,7 +260,7 @@ get_PUMS_API<-function(yr, AGEP=TRUE, GASP=FALSE, GRPIP=FALSE, JWAP=FALSE ,JWDP=
 
 
 
-new<-get_PUMS_API(yr=2017, JWAP=TRUE)
+new<-get_PUMS_API(yr=2017, HISPEED=TRUE,SEX=FALSE)
 
 
 
