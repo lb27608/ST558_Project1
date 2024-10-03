@@ -40,8 +40,10 @@ cens_tibble <- function(rawdata) {
 
 ## Get PUMS data from Census API for a single year
 
+We created an additional helper function to allow us to format any character variables we retrieve from the API. The character variables have a numeric value that corresponds to a character string. This helper function changes the numeric values into the corresponding character string for each character variable.
+
 ```{r}
-frmt_char_var<-function(y='all'){
+  frmt_char_var<-function(y='all'){
   first_url<-"https://api.census.gov/data/2022/acs/acs1/pums/variables/"
   end_url<-".json"
   var<-y
@@ -52,14 +54,15 @@ frmt_char_var<-function(y='all'){
   x<-as_tibble(var_list)
   x2<-pivot_longer(x,cols = 1:ncol(x))
 }
+```
 
+This is our main function for getting PUMS data from the Census API. The function builds a URL based on the year given, the numeric variables given, the character variables given, and the optional geography given. The data is organized as a tibble using our first helper function, cens_tibble. The function then formats the variables, numeric when appropriate, time when appropriate, and using the second helper function, frmt_char_var, when appropriate.
 
+The function requires a year, a numeric varaible, and a character variable to run. The function has no defualt year, but the function will return PWGTP always unless otherwise specified, AGEP is the defualt numeric variable, and SEX is the default character variable. A user can call as many of the optional variables as they would like.
 
+The default geography is set to state with the state code of 6. The geography can be changed to division, region, or all. Like state, division and region can have codes specified, but it is not required and all will be returned if left unspecified.
 
-
-
-
-
+```{r}
 get_PUMS_API<-function(yr, AGEP=TRUE, GASP=FALSE, GRPIP=FALSE, JWAP=FALSE ,JWDP=FALSE, 
                        JWMNP=FALSE ,FER=FALSE ,HHL=FALSE, HISPEED=FALSE, JWTRNS=FALSE, 
                        SCH=FALSE, SCHL=FALSE, SEX=TRUE, geography='state', geo_code=06)
