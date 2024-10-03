@@ -16,12 +16,12 @@ library(httr)
 library(jsonlite)
 library(hms)
 ```
+
 # Introduction
 
-In this project, we'll be creating functions to retrieve data from the US Census Public Use Microdata Sample (PUMS), manipulate that data into a tidy tibble, and then perform a few basic summary analyses. 
-# Retrieving and Processing Data from the PUMS Census API
+In this project, we'll be creating functions to retrieve data from the US Census Public Use Microdata Sample (PUMS), manipulate that data into a tidy tibble, and then perform a few basic summary analyses. \# Retrieving and Processing Data from the PUMS Census API
 
-First, we'll create a helper function that will process the raw data retrived from the API into a `tibble`. This function also adds a new class called `census` for this tibble, and we will use this class for summarizing the data later.
+First, we'll create a helper function that will process the raw data retrieved from the API into a `tibble`. This function also adds a new class called `census` for this tibble, and we will use this class for summarizing the data later.
 
 ```{r}
 
@@ -274,15 +274,16 @@ pums_years <- function(yr_list) {
   yr_len <- length(yr_list)
   
   for(i in 1:yr_len){
-    yr <- yr_list[i]
+    yr_i <- yr_list[i]
     
     # Check to see if 2020 was included and skip if necessary
-    if (yr == 2020) {
+    if (yr_i == 2020) {
+      print("Skipping 2020 - not available")
       next
     }
     
     # Get data for the specified year and append a year variable
-    yr_tib <- get_PUMS_API(yr,FER=TRUE,geography='division',geo_code=8,HHL=TRUE,JWAP=FALSE) |> mutate(year=yr)
+    yr_tib <- get_PUMS_API(yr=yr_i, HISPEED=TRUE,SEX=FALSE) |> mutate(year=yr_i)
     
     # Start or append the cumulative results tibble
         if (i == 1) {
@@ -301,11 +302,15 @@ pums_years <- function(yr_list) {
 
 ## Summary statistics
 
-We previously created a class called `census` for tibbles generated from PUMS data queriers. We now create a custom summary function for tibbles of this class to produce means and standard deviations for selected numeric variables:
+We previously created a class called `census` for tibbles generated from PUMS data queries. Now, we'll create a custom summary function for tibbles of this class to produce means and standard deviations for selected numeric variables and frequency tables for specified categorical variables.
+
+The variables to be analyzed will be passed to the summary function as a vector of variable names. If no variables for a given type (numeric or character) are specified, then all variables of that type will be summarized by default.
 
 ```{r}
 summary.census <- function(cens_tibble,num_vars,cat_vars){
+
   
+      
 }
 ```
 
