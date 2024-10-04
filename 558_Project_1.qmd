@@ -310,17 +310,37 @@ summary.census <- function(cens_tibble,num_vars,cat_vars){
 
   # Summarize numeric variables
   
+  # Extract the weights
   weight <- cens_tibble$PWGTP
   
+  # Check to see if a list of numeric variables has been specified.
+  # If not, include all numeric variables except for PWGTP and year
   if (missing(num_vars)) {
     num_vars <- cens.tibble |> select(where(is.numeric) & !PWGTP & !year)
   } 
-    
-  num_tibble <- cens_tibble |> select(all_of(num_vars))
   
-  mean_t <- sum(num_tibble*weight)/sum(weight)
+  # Subset the tibble to include the numeric variables   
+  num_tibble <- cens_tibble |> select(all_of(num_vars))
 
-  return(mean_test)
+  mean_t <- colSums(num_tibble*weight)/sum(weight)
+  sd_t <- sqrt(colSums((num_tibble ^ 2) * weight)/sum(weight) - mean_t^2)
+  
+  
+  #Summarize categorical variables
+  # Check to see if a list of categorical variables has been specified.
+  # If not, include all numeric variables except for PWGTP and year
+  if (missing(cat_vars)) {
+    cat_vars <- cens.tibble |> select(where(!is.numeric))
+  } 
+  
+  # Subset the tibble to include only the categorical variables   
+  cat_tibble <- cens_tibble |> select(all_of(cat_vars))
+  
+  # Generate counts for each variable
+  
+  
+  return(as.list(mean_t),as.list(sd_t))
+
 }
 ```
 
@@ -330,9 +350,8 @@ Finally, we create a function that allows us to generate a box plot for a specif
 
 ```{r}
 plot.census <- function(cens_tibble,num_var,cat_var) {
-  ggplot(cens_tibble,aes(x=get(cat_var), y=get(num_var), weight=PWGTP)) + geom_boxplot()
+  ggplot(cens_tibble,aes(x=get(cat_var), y=get(num_var), weight=PWGTP)) + geom_boxplot() + xlab(cat_var) + ylab(num_var)
 
-    
 }
 ```
 
@@ -346,7 +365,7 @@ First, we'll use our multi-year function, pums_years, to call the AGEP variable 
 
 ```
 
-Let's say we wanted wanted to dive further into this combination of variables, just for the year 2019. We'll call our API function, get_PUMS_API, for the year 2022.
+Let's say we wanted to dive further into this combination of variables, just for the year 2019. We'll call our API function, get_PUMS_API, for the year 2022.
 
 ```{r}
     our_PUMS_data_1<-get_PUMS_API(yr=2022, SCH=TRUE, SEX=FALSE, geography = 'region',geo_code = 01)
