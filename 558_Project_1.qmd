@@ -260,13 +260,6 @@ get_PUMS_API<-function(yr, AGEP=TRUE, GASP=FALSE, GRPIP=FALSE, JWAP=FALSE ,JWDP=
     }
   return(final)
 }
-
-
-
-new<-get_PUMS_API(yr=2017, HISPEED=TRUE,SEX=FALSE)
-
-
-
 ```
 
 Suppose a user wants to obtain multiple years of data for a given set of variables. The following function will call the query for a list of years specified as a vector of numeric values. Because there is no PUMS data available for 2020, this function will also skip that year if a user includes it in the list.
@@ -286,7 +279,7 @@ pums_years <- function(yr_list) {
     }
     
     # Get data for the specified year and append a year variable
-    yr_tib <- get_PUMS_API(yr=yr_i, HISPEED=TRUE,SEX=FALSE) |> mutate(year=yr_i)
+    yr_tib <- get_PUMS_API(yr=yr_i,vello) |> mutate(year=yr_i)
     
     # Start or append the cumulative results tibble
         if (i == 1) {
@@ -298,6 +291,8 @@ pums_years <- function(yr_list) {
   
   return(pums_combined)
 }
+
+test<-pums_years()
 
 ```
 
@@ -327,3 +322,37 @@ plot.census <- function(cens_tibble,num_var,cat_var) {
 
 }
 ```
+
+## Testing our function
+
+Suppose we want to know about how the distribution of age across school enrollment in the Northeast region in the years 2017, 2018, and 2019.
+
+First, we'll use our multi-year function, pums_years, to call the AGEP variable and SCH and set the geography to "region" and the geography code to "1" (Northeast). We'll also provide it with the list of years.
+
+```{r}
+
+```
+
+Let's say we wanted wanted to dive further into this combination of variables, just for the year 2019. We'll call our API function, get_PUMS_API, for the year 2022.
+
+```{r}
+    our_PUMS_data_1<-get_PUMS_API(yr=2022, SCH=TRUE, SEX=FALSE, geography = 'region',geo_code = 01)
+```
+
+We can calculate summary statistics for age and school enrollment.
+
+```{r}
+
+```
+
+
+We can then create a box plot for age, grouped by level of school enrollment.
+
+```{r}
+
+```
+
+
+
+
+
