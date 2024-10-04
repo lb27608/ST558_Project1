@@ -308,8 +308,19 @@ The variables to be analyzed will be passed to the summary function as a vector 
 ```{r}
 summary.census <- function(cens_tibble,num_vars,cat_vars){
 
+  # Summarize numeric variables
   
-      
+  weight <- cens_tibble$PWGTP
+  
+  if (missing(num_vars)) {
+    num_vars <- cens.tibble |> select(where(is.numeric) & !PWGTP & !year)
+  } 
+    
+  num_tibble <- cens_tibble |> select(all_of(num_vars))
+  
+  mean_t <- sum(num_tibble*weight)/sum(weight)
+
+  return(mean_test)
 }
 ```
 
@@ -321,6 +332,7 @@ Finally, we create a function that allows us to generate a box plot for a specif
 plot.census <- function(cens_tibble,num_var,cat_var) {
   ggplot(cens_tibble,aes(x=get(cat_var), y=get(num_var), weight=PWGTP)) + geom_boxplot()
 
+    
 }
 ```
 
@@ -346,14 +358,8 @@ We can calculate summary statistics for age and school enrollment.
 
 ```
 
-
 We can then create a box plot for age, grouped by level of school enrollment.
 
 ```{r}
 
 ```
-
-
-
-
-
