@@ -316,7 +316,7 @@ summary.census <- function(cens_tibble,num_vars,cat_vars){
   # Check to see if a list of numeric variables has been specified.
   # If not, include all numeric variables except for PWGTP and year
   if (missing(num_vars)) {
-    num_vars <- cens.tibble |> select(where(is.numeric) & !PWGTP & !year)
+    num_vars <- names(cens_tibble |> select(where(is.numeric) & !PWGTP))
   } 
   
   # Subset the tibble to include the numeric variables   
@@ -330,16 +330,21 @@ summary.census <- function(cens_tibble,num_vars,cat_vars){
   # Check to see if a list of categorical variables has been specified.
   # If not, include all numeric variables except for PWGTP and year
   if (missing(cat_vars)) {
-    cat_vars <- cens.tibble |> select(where(!is.numeric))
+    cat_vars <- names(cens_tibble |> select(where(is.character)))
   } 
   
   # Subset the tibble to include only the categorical variables   
-  cat_tibble <- cens_tibble |> select(all_of(cat_vars))
+  #cat_tibble <- cens_tibble |> select(any_of(cat_vars))
   
-  # Generate counts for each variable
+  # Generate weighted counts for each variable
+  #count_t <- list()
+  #for (i in 1:length(cat_vars)) {
+    #count_t[i] <- count(cat_tibble,cat_vars[i],wt=weight)
+  #}
   
-  
-  return(as.list(mean_t),as.list(sd_t))
+  #final <- as.list(as.list(mean_t),as.list(sd_t),as_list(count_t))
+  final <- as.list(c(mean=mean_t,sd=sd_t))
+  return(final)
 
 }
 ```
@@ -350,35 +355,36 @@ Finally, we create a function that allows us to generate a box plot for a specif
 
 ```{r}
 plot.census <- function(cens_tibble,num_var,cat_var) {
-  ggplot(cens_tibble,aes(x=get(cat_var), y=get(num_var), weight=PWGTP)) + geom_boxplot() + xlab(cat_var) + ylab(num_var)
+  ggplot(cens_tibble,aes(x=get(cat_var), y=get(num_var), weight=PWGTP)) + geom_boxplot() + xlab(cat_var) + ylab(num_var) + scale_x_discrete(guide = guide_axis(n.dodge=3))
 
 }
+
 ```
 
-## Testing our function
+## Testing our functions
 
 Suppose we want to know about age and school enrollment in the Northeast region in the years 2017, 2018, and 2019.
 
 First, we'll use our multi-year function, pums_years, to call the AGEP variable and SCH and set the geography to "region" and the geography code to "1" (Northeast). We'll also provide it with the list of years.
 
 ```{r}
-
+data_1 <- pums_years(yr_list=c(2017,2018,2019),AGEP=TRUE, SCH=TRUE, geography='region',geo_code= 01)
 ```
 
-Let's say we wanted to dive further into this combination of variables, just for the year 2019. We'll call our API function, get_PUMS_API, for the year 2022.
+Let's say we wanted to dive further into this combination of variables, just for the year 2019. We'll call our API function, get_PUMS_API, for the year 2019.
 
 ```{r}
-    our_PUMS_data_1<-get_PUMS_API(yr=2022, SCH=TRUE, SEX=FALSE, geography = 'region',geo_code = 01)
+    our_PUMS_data_1<-get_PUMS_API(yr=2019, SCH=TRUE, SEX=FALSE, geography = 'region',geo_code = 01)
 ```
 
 We can calculate summary statistics for age and school enrollment.
 
 ```{r}
-
+summary.census(cens_tibble=our_PUMS_data_1,num_var="AGEP",cat_var="SCH")
 ```
 
 We can then create a box plot for age, grouped by level of school enrollment.
 
 ```{r}
-
+plot.census(cens_tibble=our_PUMS_data_1,num_var="AGEP",cat_var="SCH")
 ```
