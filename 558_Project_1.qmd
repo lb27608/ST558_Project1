@@ -69,6 +69,13 @@ get_PUMS_API<-function(yr, AGEP=TRUE, GASP=FALSE, GRPIP=FALSE, JWAP=FALSE ,JWDP=
                        JWMNP=FALSE ,FER=FALSE ,HHL=FALSE, HISPEED=FALSE, JWTRNS=FALSE, 
                        SCH=FALSE, SCHL=FALSE, SEX=TRUE, geography='state', geo_code=06)
   {
+  
+  # The first part of this function builds the URL that will be used to contact the API
+    # The year is checked to be in the correct range
+    # The input is checked for variables specified
+    # The input is checked for at least one numric variable and at least one character variable
+    # The geography component is checked
+  
   base_url<-"https://api.census.gov/data/"
   if(yr>=2010 & yr<=2022){
     year_url<-paste(yr,'/',sep='')
@@ -150,6 +157,13 @@ get_PUMS_API<-function(yr, AGEP=TRUE, GASP=FALSE, GRPIP=FALSE, JWAP=FALSE ,JWDP=
     }
   url_pums<-paste0(base_url, year_url, middle_base_url, get_start_url, vars_url,        
                    get_end_url,for_url,geo_url)
+  
+  # The second part of the function applies formats to the tibble created
+    # The data is converted to a tibble using the first helper function
+    # Numeric variables are converted to numeric values
+    # Time variables are converted to time values
+    # Character variables are converted from their numeric form to their character form using second helper function
+  
   final<-cens_tibble(url_pums)
   final$PWGTP<-as.numeric(final$PWGTP)
   if(AGEP){
@@ -391,7 +405,7 @@ The box plot indicates, not surprisingly, that the median age of those who have 
 Now suppose we want to know about age and school enrollment in the Northeast region in the years 2017, 2018, and 2022. We'll use our multi-year function, `pums_years`, to call the `AGEP` variable and `SCH` and set the geography to "region" and the geography code to "1" (Northeast). We'll also provide it with the list of years.
 
 ```{r}
-our_PUMS_data_2 <- pums_years(yr_list=c(2017,2018,2022),AGEP=TRUE, SCH=TRUE, geography='region',geo_code= 01)
+our_PUMS_data_2 <- pums_years(yr_list=c(2017,2018,2022),AGEP=TRUE, SCH=TRUE, SEX=FALSE, geography='region',geo_code= 01)
 
 our_PUMS_data_2
 ```
@@ -399,9 +413,9 @@ our_PUMS_data_2
 We'll check the summary statistics for age and school enrollment for all three of these years together:
 
 ```{r}
-sum_2017_22 <- summary.census(cens_tibble=our_PUMS_data_2,num_var="AGEP",cat_var="SCH")
+sum_2017_18_22 <- summary.census(cens_tibble=our_PUMS_data_2,num_var="AGEP",cat_var="SCH")
 
-sum_2017_22
+sum_2017_18_22
 ```
 We see that the average age across all of these years is about the same as it was for 2019, with similar variability. 
 
