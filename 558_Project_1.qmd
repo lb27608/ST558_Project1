@@ -321,7 +321,7 @@ summary.census <- function(cens_tibble,num_vars,cat_vars){
   
   # Subset the tibble to include the numeric variables   
   num_tibble <- cens_tibble |> select(all_of(num_vars))
-
+tt
   mean_t <- colSums(num_tibble*weight)/sum(weight)
   sd_t <- sqrt(colSums((num_tibble ^ 2) * weight)/sum(weight) - mean_t^2)
   
@@ -334,16 +334,15 @@ summary.census <- function(cens_tibble,num_vars,cat_vars){
   } 
   
   # Subset the tibble to include only the categorical variables   
-  #cat_tibble <- cens_tibble |> select(any_of(cat_vars))
+  cat_tibble <- cens_tibble |> select(any_of(cat_vars),PWGTP)
   
   # Generate weighted counts for each variable
-  #count_t <- list()
-  #for (i in 1:length(cat_vars)) {
-    #count_t[i] <- count(cat_tibble,cat_vars[i],wt=weight)
-  #}
-  
-  #final <- as.list(as.list(mean_t),as.list(sd_t),as_list(count_t))
-  final <- as.list(c(mean=mean_t,sd=sd_t))
+  count_t <- vector(mode="list")
+  for (i in 1:length(cat_vars)) {
+    count_t[[i]] <- cat_tibble |> group_by(cat_tibble[ ,i]) |> summarize(weighted_count=sum(PWGTP))
+  }
+
+  final <- as.list(c(mean=mean_t,sd=sd_t,count=count_t))
   return(final)
 
 }
@@ -377,7 +376,7 @@ Let's say we wanted to dive further into this combination of variables, just for
     our_PUMS_data_1<-get_PUMS_API(yr=2019, SCH=TRUE, SEX=FALSE, geography = 'region',geo_code = 01)
 ```
 
-We can calculate summary statistics for age and school enrollment.
+We can now calculate summary statistics for age and school enrollment.
 
 ```{r}
 summary.census(cens_tibble=our_PUMS_data_1,num_var="AGEP",cat_var="SCH")
