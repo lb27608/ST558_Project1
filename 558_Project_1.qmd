@@ -19,7 +19,9 @@ library(hms)
 
 # Introduction
 
-In this project, we'll be creating functions to retrieve data from the US Census Public Use Microdata Sample (PUMS), manipulate that data into a tidy tibble, and then perform a few basic summary analyses. \# Retrieving and Processing Data from the PUMS Census API
+In this project, we'll be creating functions to retrieve data from the US Census Public Use Microdata Sample (PUMS), manipulate that data into a tidy tibble, and then perform a few basic summary analyses. 
+
+# Retrieving and Processing Data from the PUMS Census API
 
 First, we'll create a helper function that will process the raw data retrieved from the API into a `tibble`. This function also adds a new class called `census` for this tibble, and we will use this class for summarizing the data later.
 
@@ -56,9 +58,9 @@ We created an additional helper function to allow us to format any character var
 }
 ```
 
-This is our main function for getting PUMS data from the Census API. The function builds a URL based on the year given, the numeric variables given, the character variables given, and the optional geography given. The data is organized as a tibble using our first helper function, cens_tibble. The function then formats the variables, numeric when appropriate, time when appropriate, and using the second helper function, frmt_char_var, when appropriate.
+This is our main function for getting PUMS data from the Census API. The function builds a URL based on the year given, the numeric variables given, the character variables given, and the optional geography given. The data is organized as a tibble using our first helper function, `cens_tibble`. The function then formats the variables, numeric when appropriate, time when appropriate, and using the second helper function, `frmt_char_var`, when appropriate.
 
-The function requires a year, a numeric varaible, and a character variable to run. The function has no defualt year, but the function will return PWGTP always unless otherwise specified, AGEP is the defualt numeric variable, and SEX is the default character variable. A user can call as many of the optional variables as they would like.
+The function requires a year, a numeric varaible, and a character variable to run. The function has no defualt year, but the function will return `PWGTP` always unless otherwise specified. `AGEP` is the defualt numeric variable, and `SEX` is the default character variable. A user can call as many of the optional variables as they would like.
 
 The default geography is set to state with the state code of 6. The geography can be changed to division, region, or all. Like state, division and region can have codes specified, but it is not required and all will be returned if left unspecified.
 
@@ -321,7 +323,6 @@ summary.census <- function(cens_tibble,num_vars,cat_vars){
   
   # Subset the tibble to include the numeric variables   
   num_tibble <- cens_tibble |> select(all_of(num_vars))
-tt
   mean_t <- colSums(num_tibble*weight)/sum(weight)
   sd_t <- sqrt(colSums((num_tibble ^ 2) * weight)/sum(weight) - mean_t^2)
   
@@ -362,28 +363,45 @@ plot.census <- function(cens_tibble,num_var,cat_var) {
 
 ## Testing our functions
 
-Suppose we want to know about age and school enrollment in the Northeast region in the years 2017, 2018, and 2019.
-
-First, we'll use our multi-year function, pums_years, to call the AGEP variable and SCH and set the geography to "region" and the geography code to "1" (Northeast). We'll also provide it with the list of years.
-
-```{r}
-data_1 <- pums_years(yr_list=c(2017,2018,2019),AGEP=TRUE, SCH=TRUE, geography='region',geo_code= 01)
-```
-
-Let's say we wanted to dive further into this combination of variables, just for the year 2019. We'll call our API function, get_PUMS_API, for the year 2019.
+Let's say we wanted to explore age and school enrollment, just for the year 2019, in the Northeast region (`geo_code = 01`). We'll call our API function, `get_PUMS_API`, for the year 2019 and specify that the variable for school enrollment (`SCH`) should be included and that the default variable `SEX` should be excluded:
 
 ```{r}
     our_PUMS_data_1<-get_PUMS_API(yr=2019, SCH=TRUE, SEX=FALSE, geography = 'region',geo_code = 01)
+
+    our_PUMS_data_1
 ```
 
-We can now calculate summary statistics for age and school enrollment.
+We can now calculate summary statistics for age and school enrollment for 2019:
 
 ```{r}
-summary.census(cens_tibble=our_PUMS_data_1,num_var="AGEP",cat_var="SCH")
+sum_2019 <- summary.census(cens_tibble=our_PUMS_data_1,num_var="AGEP",cat_var="SCH")
+
+sum_2019
 ```
 
-We can then create a box plot for age, grouped by level of school enrollment.
+The results show that the mean age is about 40.4 years, with a standard deviation of 23.3 years. 
+We can then create a box plot for age, grouped by level of school enrollment. We also see that most people have not attended school in the last 3 months. Next, let's look at the distribution of ages by school enrollment status:
 
 ```{r}
 plot.census(cens_tibble=our_PUMS_data_1,num_var="AGEP",cat_var="SCH")
 ```
+
+The box plot indicates, not surprisingly, that the median age of those who have not been enrolled in school for the past 3 months is around 50 years, while those who have been enrolled in school have a median age of less than 25. Even so, we see that some people have been recently enrolled up to ages approaching 100.
+
+Now suppose we want to know about age and school enrollment in the Northeast region in the years 2017, 2018, and 2022. We'll use our multi-year function, `pums_years`, to call the `AGEP` variable and `SCH` and set the geography to "region" and the geography code to "1" (Northeast). We'll also provide it with the list of years.
+
+```{r}
+our_PUMS_data_2 <- pums_years(yr_list=c(2017,2018,2022),AGEP=TRUE, SCH=TRUE, geography='region',geo_code= 01)
+
+our_PUMS_data_2
+```
+ 
+We'll check the summary statistics for age and school enrollment for all three of these years together:
+
+```{r}
+sum_2017_22 <- summary.census(cens_tibble=our_PUMS_data_2,num_var="AGEP",cat_var="SCH")
+
+sum_2017_22
+```
+We see that the average age across all of these years is about the same as it was for 2019, with similar variability. 
+

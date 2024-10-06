@@ -142,7 +142,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
-<p>In this project, we’ll be creating functions to retrieve data from the US Census Public Use Microdata Sample (PUMS), manipulate that data into a tidy tibble, and then perform a few basic summary analyses. # Retrieving and Processing Data from the PUMS Census API</p>
+<p>In this project, we’ll be creating functions to retrieve data from the US Census Public Use Microdata Sample (PUMS), manipulate that data into a tidy tibble, and then perform a few basic summary analyses.</p>
+</section>
+<section id="retrieving-and-processing-data-from-the-pums-census-api" class="level1">
+<h1>Retrieving and Processing Data from the PUMS Census API</h1>
 <p>First, we’ll create a helper function that will process the raw data retrieved from the API into a <code>tibble</code>. This function also adds a new class called <code>census</code> for this tibble, and we will use this class for summarizing the data later.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>cens_tibble <span class="ot">&lt;-</span> <span class="cf">function</span>(rawdata) {</span>
@@ -173,8 +176,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  x2<span class="ot">&lt;-</span><span class="fu">pivot_longer</span>(x,<span class="at">cols =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(x))</span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>This is our main function for getting PUMS data from the Census API. The function builds a URL based on the year given, the numeric variables given, the character variables given, and the optional geography given. The data is organized as a tibble using our first helper function, cens_tibble. The function then formats the variables, numeric when appropriate, time when appropriate, and using the second helper function, frmt_char_var, when appropriate.</p>
-<p>The function requires a year, a numeric varaible, and a character variable to run. The function has no defualt year, but the function will return PWGTP always unless otherwise specified, AGEP is the defualt numeric variable, and SEX is the default character variable. A user can call as many of the optional variables as they would like.</p>
+<p>This is our main function for getting PUMS data from the Census API. The function builds a URL based on the year given, the numeric variables given, the character variables given, and the optional geography given. The data is organized as a tibble using our first helper function, <code>cens_tibble</code>. The function then formats the variables, numeric when appropriate, time when appropriate, and using the second helper function, <code>frmt_char_var</code>, when appropriate.</p>
+<p>The function requires a year, a numeric varaible, and a character variable to run. The function has no defualt year, but the function will return <code>PWGTP</code> always unless otherwise specified. <code>AGEP</code> is the defualt numeric variable, and <code>SEX</code> is the default character variable. A user can call as many of the optional variables as they would like.</p>
 <p>The default geography is set to state with the state code of 6. The geography can be changed to division, region, or all. Like state, division and region can have codes specified, but it is not required and all will be returned if left unspecified.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>get_PUMS_API<span class="ot">&lt;-</span><span class="cf">function</span>(yr, <span class="at">AGEP=</span><span class="cn">TRUE</span>, <span class="at">GASP=</span><span class="cn">FALSE</span>, <span class="at">GRPIP=</span><span class="cn">FALSE</span>, <span class="at">JWAP=</span><span class="cn">FALSE</span> ,<span class="at">JWDP=</span><span class="cn">FALSE</span>, </span>
@@ -431,32 +434,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Subset the tibble to include the numeric variables   </span></span>
 <span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  num_tibble <span class="ot">&lt;-</span> cens_tibble <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">all_of</span>(num_vars))</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  mean_t <span class="ot">&lt;-</span> <span class="fu">colSums</span>(num_tibble<span class="sc">*</span>weight)<span class="sc">/</span><span class="fu">sum</span>(weight)</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  sd_t <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">colSums</span>((num_tibble <span class="sc">^</span> <span class="dv">2</span>) <span class="sc">*</span> weight)<span class="sc">/</span><span class="fu">sum</span>(weight) <span class="sc">-</span> mean_t<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  mean_t <span class="ot">&lt;-</span> <span class="fu">colSums</span>(num_tibble<span class="sc">*</span>weight)<span class="sc">/</span><span class="fu">sum</span>(weight)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  sd_t <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">colSums</span>((num_tibble <span class="sc">^</span> <span class="dv">2</span>) <span class="sc">*</span> weight)<span class="sc">/</span><span class="fu">sum</span>(weight) <span class="sc">-</span> mean_t<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Summarize categorical variables</span></span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Check to see if a list of categorical variables has been specified.</span></span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># If not, include all numeric variables except for PWGTP and year</span></span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">missing</span>(cat_vars)) {</span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    cat_vars <span class="ot">&lt;-</span> <span class="fu">names</span>(cens_tibble <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">where</span>(is.character)))</span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  } </span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Subset the tibble to include only the categorical variables   </span></span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>  <span class="co">#cat_tibble &lt;- cens_tibble |&gt; select(any_of(cat_vars))</span></span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Generate weighted counts for each variable</span></span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>  <span class="co">#count_t &lt;- list()</span></span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>  <span class="co">#for (i in 1:length(cat_vars)) {</span></span>
-<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">#count_t[i] &lt;- count(cat_tibble,cat_vars[i],wt=weight)</span></span>
-<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>  <span class="co">#}</span></span>
-<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>  <span class="co">#final &lt;- as.list(as.list(mean_t),as.list(sd_t),as_list(count_t))</span></span>
-<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>  final <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="fu">c</span>(<span class="at">mean=</span>mean_t,<span class="at">sd=</span>sd_t))</span>
-<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(final)</span>
-<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Summarize categorical variables</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Check to see if a list of categorical variables has been specified.</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># If not, include all numeric variables except for PWGTP and year</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">missing</span>(cat_vars)) {</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    cat_vars <span class="ot">&lt;-</span> <span class="fu">names</span>(cens_tibble <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">where</span>(is.character)))</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  } </span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Subset the tibble to include only the categorical variables   </span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  cat_tibble <span class="ot">&lt;-</span> cens_tibble <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">any_of</span>(cat_vars),PWGTP)</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Generate weighted counts for each variable</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>  count_t <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode=</span><span class="st">"list"</span>)</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(cat_vars)) {</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    count_t[[i]] <span class="ot">&lt;-</span> cat_tibble <span class="sc">|&gt;</span> <span class="fu">group_by</span>(cat_tibble[ ,i]) <span class="sc">|&gt;</span> <span class="fu">summarize</span>(<span class="at">weighted_count=</span><span class="fu">sum</span>(PWGTP))</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>  final <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="fu">c</span>(<span class="at">mean=</span>mean_t,<span class="at">sd=</span>sd_t,<span class="at">count=</span>count_t))</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(final)</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="creating-box-plots" class="level2">
@@ -464,45 +465,114 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Finally, we create a function that allows us to generate a box plot for a specified numeric variable, grouped by the levels of a specified categorical variable:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>plot.census <span class="ot">&lt;-</span> <span class="cf">function</span>(cens_tibble,num_var,cat_var) {</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(cens_tibble,<span class="fu">aes</span>(<span class="at">x=</span><span class="fu">get</span>(cat_var), <span class="at">y=</span><span class="fu">get</span>(num_var), <span class="at">weight=</span>PWGTP)) <span class="sc">+</span> <span class="fu">geom_boxplot</span>() <span class="sc">+</span> <span class="fu">xlab</span>(cat_var) <span class="sc">+</span> <span class="fu">ylab</span>(num_var)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(cens_tibble,<span class="fu">aes</span>(<span class="at">x=</span><span class="fu">get</span>(cat_var), <span class="at">y=</span><span class="fu">get</span>(num_var), <span class="at">weight=</span>PWGTP)) <span class="sc">+</span> <span class="fu">geom_boxplot</span>() <span class="sc">+</span> <span class="fu">xlab</span>(cat_var) <span class="sc">+</span> <span class="fu">ylab</span>(num_var) <span class="sc">+</span> <span class="fu">scale_x_discrete</span>(<span class="at">guide =</span> <span class="fu">guide_axis</span>(<span class="at">n.dodge=</span><span class="dv">3</span>))</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>data_1 <span class="ot">&lt;-</span> <span class="fu">pums_years</span>(<span class="at">yr_list=</span><span class="fu">c</span>(<span class="dv">2017</span>),<span class="at">AGEP=</span><span class="cn">TRUE</span>, <span class="at">SCH=</span><span class="cn">TRUE</span>, <span class="at">geography=</span><span class="st">'region'</span>,<span class="at">geo_code=</span> <span class="dv">01</span>)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.census</span>(data_1,<span class="st">"AGEP"</span>,<span class="st">"SCH"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="558_Project_1_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="testing-our-functions" class="level2">
 <h2 class="anchored" data-anchor-id="testing-our-functions">Testing our functions</h2>
-<p>Suppose we want to know about age and school enrollment in the Northeast region in the years 2017, 2018, and 2019.</p>
-<p>First, we’ll use our multi-year function, pums_years, to call the AGEP variable and SCH and set the geography to “region” and the geography code to “1” (Northeast). We’ll also provide it with the list of years.</p>
+<p>Let’s say we wanted to explore age and school enrollment, just for the year 2019, in the Northeast region (<code>geo_code = 01</code>). We’ll call our API function, <code>get_PUMS_API</code>, for the year 2019 and specify that the variable for school enrollment (<code>SCH</code>) should be included and that the default variable <code>SEX</code> should be excluded:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>data_1 <span class="ot">&lt;-</span> <span class="fu">pums_years</span>(<span class="at">yr_list=</span><span class="fu">c</span>(<span class="dv">2017</span>,<span class="dv">2018</span>,<span class="dv">2019</span>),<span class="at">AGEP=</span><span class="cn">TRUE</span>, <span class="at">SCH=</span><span class="cn">TRUE</span>, <span class="at">geography=</span><span class="st">'region'</span>,<span class="at">geo_code=</span> <span class="dv">01</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>    our_PUMS_data_1<span class="ot">&lt;-</span><span class="fu">get_PUMS_API</span>(<span class="at">yr=</span><span class="dv">2019</span>, <span class="at">SCH=</span><span class="cn">TRUE</span>, <span class="at">SEX=</span><span class="cn">FALSE</span>, <span class="at">geography =</span> <span class="st">'region'</span>,<span class="at">geo_code =</span> <span class="dv">01</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    our_PUMS_data_1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 566,977 × 4
+   PWGTP  AGEP region SCH                                          
+   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;                                        
+ 1    10    85 1      No, has not attended in the last 3 months    
+ 2    11    16 1      Yes, public school or public college         
+ 3    33    71 1      No, has not attended in the last 3 months    
+ 4    80    19 1      Yes, private school or college or home school
+ 5    37    83 1      No, has not attended in the last 3 months    
+ 6    77    60 1      No, has not attended in the last 3 months    
+ 7    78    18 1      Yes, public school or public college         
+ 8    71    79 1      No, has not attended in the last 3 months    
+ 9    17    20 1      Yes, public school or public college         
+10    73    20 1      Yes, public school or public college         
+# ℹ 566,967 more rows</code></pre>
 </div>
-<p>Let’s say we wanted to dive further into this combination of variables, just for the year 2019. We’ll call our API function, get_PUMS_API, for the year 2022.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>    our_PUMS_data_1<span class="ot">&lt;-</span><span class="fu">get_PUMS_API</span>(<span class="at">yr=</span><span class="dv">2022</span>, <span class="at">SCH=</span><span class="cn">TRUE</span>, <span class="at">SEX=</span><span class="cn">FALSE</span>, <span class="at">geography =</span> <span class="st">'region'</span>,<span class="at">geo_code =</span> <span class="dv">01</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>We can calculate summary statistics for age and school enrollment.</p>
-<p>We can then create a box plot for age, grouped by level of school enrollment.</p>
+<p>We can now calculate summary statistics for age and school enrollment for 2019:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.census</span>(<span class="at">cens_tibble=</span>our_PUMS_data_1,<span class="at">num_var=</span><span class="st">"AGEP"</span>,<span class="at">cat_var=</span><span class="st">"SCH"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sum_2019 <span class="ot">&lt;-</span> <span class="fu">summary.census</span>(<span class="at">cens_tibble=</span>our_PUMS_data_1,<span class="at">num_var=</span><span class="st">"AGEP"</span>,<span class="at">cat_var=</span><span class="st">"SCH"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>sum_2019</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$mean.AGEP
+[1] 40.35198
+
+$sd.AGEP
+[1] 23.34157
+
+$count
+# A tibble: 4 × 2
+  SCH                                           weighted_count
+  &lt;chr&gt;                                                  &lt;dbl&gt;
+1 N/A (less than 3 years old)                          1782558
+2 No, has not attended in the last 3 months           40976184
+3 Yes, private school or college or home school        3054135
+4 Yes, public school or public college                10169926</code></pre>
+</div>
+</div>
+<p>The results show that the mean age is about 40.4 years, with a standard deviation of 23.3 years. We can then create a box plot for age, grouped by level of school enrollment. We also see that most people have not attended school in the last 3 months. Next, let’s look at the distribution of ages by school enrollment status:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.census</span>(<span class="at">cens_tibble=</span>our_PUMS_data_1,<span class="at">num_var=</span><span class="st">"AGEP"</span>,<span class="at">cat_var=</span><span class="st">"SCH"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="558_Project_1_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="558_Project_1_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>The box plot indicates, not surprisingly, that the median age of those who have not been enrolled in school for the past 3 months is around 50 years, while those who have been enrolled in school have a median age of less than 25. Even so, we see that some people have been recently enrolled up to ages approaching 100.</p>
+<p>Now suppose we want to know about age and school enrollment in the Northeast region in the years 2017, 2018, and 2022. We’ll use our multi-year function, <code>pums_years</code>, to call the <code>AGEP</code> variable and <code>SCH</code> and set the geography to “region” and the geography code to “1” (Northeast). We’ll also provide it with the list of years.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>our_PUMS_data_2 <span class="ot">&lt;-</span> <span class="fu">pums_years</span>(<span class="at">yr_list=</span><span class="fu">c</span>(<span class="dv">2017</span>,<span class="dv">2018</span>,<span class="dv">2022</span>),<span class="at">AGEP=</span><span class="cn">TRUE</span>, <span class="at">SCH=</span><span class="cn">TRUE</span>, <span class="at">geography=</span><span class="st">'region'</span>,<span class="at">geo_code=</span> <span class="dv">01</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>our_PUMS_data_2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1,711,878 × 6
+   PWGTP  AGEP region SCH                                       SEX     year
+   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;                                     &lt;chr&gt;  &lt;dbl&gt;
+ 1    55    34 1      No, has not attended in the last 3 months Female  2017
+ 2    56    34 1      No, has not attended in the last 3 months Male    2017
+ 3    48    10 1      Yes, public school or public college      Male    2017
+ 4    51     5 1      Yes, public school or public college      Male    2017
+ 5    72    76 1      No, has not attended in the last 3 months Male    2017
+ 6    69    74 1      No, has not attended in the last 3 months Female  2017
+ 7    77    53 1      No, has not attended in the last 3 months Female  2017
+ 8    97    51 1      No, has not attended in the last 3 months Male    2017
+ 9    84    26 1      No, has not attended in the last 3 months Male    2017
+10    88    22 1      Yes, public school or public college      Male    2017
+# ℹ 1,711,868 more rows</code></pre>
+</div>
+</div>
+<p>We’ll check the summary statistics for age and school enrollment for all three of these years together:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>sum_2017_22 <span class="ot">&lt;-</span> <span class="fu">summary.census</span>(<span class="at">cens_tibble=</span>our_PUMS_data_2,<span class="at">num_var=</span><span class="st">"AGEP"</span>,<span class="at">cat_var=</span><span class="st">"SCH"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>sum_2017_22</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$mean.AGEP
+[1] 40.27382
+
+$sd.AGEP
+[1] 23.28331
+
+$count
+# A tibble: 4 × 2
+  SCH                                           weighted_count
+  &lt;chr&gt;                                                  &lt;dbl&gt;
+1 N/A (less than 3 years old)                          5361638
+2 No, has not attended in the last 3 months          124111433
+3 Yes, private school or college or home school        9329585
+4 Yes, public school or public college                30819410</code></pre>
+</div>
+</div>
+<p>We see that the average age across all of these years is about the same as it was for 2019, with similar variability.</p>
 
 
 </section>
